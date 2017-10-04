@@ -48,7 +48,7 @@ module Fluent
         end
 
         tag = rewrite_tag!(tag.dup)
-        program = record["program"] || tag
+        program = record["program"] || 'missing-program'
         hostname = record["local_hostname"] || @hostname
         cache_tag = "#{hostname}-#{program}"
         @loggers[cache_tag] ||= RemoteSyslogLogger::UdpSender.new(@host,

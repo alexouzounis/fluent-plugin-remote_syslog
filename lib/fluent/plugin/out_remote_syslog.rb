@@ -31,6 +31,14 @@ module Fluent
       super
     end
 
+    def truncated(string)
+      if string.length > 31
+        string[0,20] + "..." + string[-7,7]
+      else
+        string
+      end
+    end
+
     def emit(tag, es, chain)
       es.each do |time, record|
         record.each_pair do |k, v|
@@ -40,15 +48,17 @@ module Fluent
         end
 
         tag = rewrite_tag!(tag.dup)
-        record["debug-tag"] = tag
-        @loggers[tag] ||= RemoteSyslogLogger::UdpSender.new(@host,
+        program = record["program"] || tag
+        hostname = record["local_hostname"] || @hostname
+        cache_tag = "#{hostname}-#{program}"
+        @loggers[cache_tag] ||= RemoteSyslogLogger::UdpSender.new(@host,
           @port,
           facility: record["facility"] || @facility,
           severity: record["severity"] || @severity,
-          program: record["program"] || tag,
-          local_hostname: record["local_hostname"] || @hostname)
+          program: program,
+          local_hostname: hostname)
 
-        @loggers[tag].transmit format(tag, time, record)
+        @loggers[cache_tag].transmit format(truncated(cache_tag), time, record)
       end
       chain.next
     end

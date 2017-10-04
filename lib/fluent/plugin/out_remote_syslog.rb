@@ -50,16 +50,15 @@ module Fluent
         program = record["program"] || tag
         hostname = record["local_hostname"] || @hostname
         cache_tag = "#{hostname}-#{program}"
-        tag = truncated(program.dup)
-        rewrite_tag! tag
+        newtag = truncated(program.dup)
         @loggers[cache_tag] ||= RemoteSyslogLogger::UdpSender.new(@host,
           @port,
           facility: record["facility"] || @facility,
           severity: record["severity"] || @severity,
-          program: tag,
+          program: newtag,
           local_hostname: hostname)
 
-        @loggers[cache_tag].transmit format(tag, time, record)
+        @loggers[cache_tag].transmit format(newtag, time, record)
       end
       chain.next
     end

@@ -56,7 +56,7 @@ module Fluent
           @port,
           facility: record["facility"] || @facility,
           severity: record["severity"] || @severity,
-          program: tag
+          program: tag,
           local_hostname: hostname)
 
         @loggers[cache_tag].transmit format(tag, time, record)

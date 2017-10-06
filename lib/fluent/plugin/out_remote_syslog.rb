@@ -58,7 +58,7 @@ module Fluent
           program: newtag,
           local_hostname: hostname)
 
-        @loggers[cache_tag].transmit format(newtag, time, record)
+        @loggers[cache_tag].transmit format(newtag, time, (if record.key?('log') then record['log'] else record end))
       end
       chain.next
     end
